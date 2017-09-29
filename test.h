@@ -13,12 +13,12 @@
 #ifndef TEST_H
 #define TEST_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 /* Constants */
 #define TEST_PASS 1
 #define TEST_FAIL 0
-
-#include <stdio.h>
-#include <stdlib.h>
 
 /*
  * Assert that a condition is true.
