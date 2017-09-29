@@ -13,7 +13,7 @@
 #ifndef TEST_H
 #define TEST_H
 
-/* Constants  */
+/* Constants */
 #define TEST_PASS 1
 #define TEST_FAIL 0
 
@@ -45,7 +45,7 @@
  * that failed will be printed.
  */
 #define test_run(test_name) { \
-        test_fail_expr = NULL; \
+		test_fail_expr = NULL; \
 		test_fail_file = NULL; \
 		test_fail_line = 0L; \
 		if ((test_name)() == TEST_PASS) { \
@@ -122,6 +122,12 @@ void *__wrap_malloc(size_t s)
 #define test_malloc_enable() test_malloc_fail_after(-1)
 #define test_malloc_disable() test_malloc_fail_after(0)
 
+#else
+
+#define test_malloc_fail_after(n) do {} while (0)
+#define test_malloc_enable() do {} while (0)
+#define test_malloc_disable() do {} while (0)
+
 #endif /* WRAP_MALLOC */
 
 /*
@@ -135,7 +141,7 @@ void *__wrap_malloc(size_t s)
 #ifdef WRAP_REALLOC
 
 /* Counts the number of realloc calls made so far. */
-long test_realloc_call_count = 0L;
+long test_realloc_call_count = 0;
 
 /* After how many calls realloc will fail (return NULL). */
 long test_realloc_fail_after = -1;
@@ -160,6 +166,12 @@ void *__wrap_realloc(void *ptr, size_t s)
 /* Convenience macros for making realloc fail/succeed. */
 #define test_realloc_enable() test_realloc_fail_after(-1)
 #define test_realloc_disable() test_realloc_fail_after(0)
+
+#else
+
+#define test_realloc_fail_after(n) do {} while (0)
+#define test_realloc_enable() do {} while (0)
+#define test_realloc_disable() do {} while (0)
 
 #endif /* WRAP_REALLOC */
 
