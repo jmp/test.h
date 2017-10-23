@@ -16,10 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* Constants */
-#define TEST_PASS 1
-#define TEST_FAIL 0
-
 /*
  * Assert that a condition is true.
  *
@@ -32,27 +28,29 @@
 		test_fail_expr = #expr; \
 		test_fail_file = __FILE__; \
 		test_fail_line = __LINE__; \
-		test_malloc_enable(); \
-		test_realloc_enable(); \
-		return TEST_FAIL; \
+		++test_fail_count; \
+		return; \
 	}
 
 /*
- * Run the given test and print the results for that test.
+ * Run the given test function and print the results for that test.
  *
  * This will print either "OK" or "FAIL", followed by the name of the test.
  * If the test fails, the filename and line number as well as the expression
  * that failed will be printed.
  */
 #define test_run(test_name) { \
+		const unsigned fails_before = test_fail_count; \
+		test_malloc_enable(); \
+		test_realloc_enable(); \
 		test_fail_expr = NULL; \
 		test_fail_file = NULL; \
 		test_fail_line = 0L; \
-		if ((test_name)() == TEST_PASS) { \
+		(test_name)(); \
+		if (test_fail_count == fails_before) { \
 			++test_pass_count; \
 			fprintf(stdout, "OK    " #test_name "\n"); \
 		} else { \
-			++test_fail_count; \
 			fprintf(stderr, "FAIL  " #test_name "\n"); \
 			if (test_fail_expr != NULL) { \
 				fprintf(stderr, "\n      In file %s, line %ld:\n\n", \
@@ -73,8 +71,8 @@
 		test_fail_count \
 	);
 
-/* Gets the number of failed tests. */
-#define test_get_fail_count() (test_fail_count)
+/* Returns exit code depending on the number of failures. */
+#define test_get_status() (test_fail_count != 0 ? EXIT_SUCCESS : EXIT_FAILURE)
 
 /* Keep track of how many tests have passed and failed. */
 unsigned test_pass_count = 0;
@@ -143,7 +141,10 @@ void *__wrap_malloc(size_t s)
 /* Counts the number of realloc calls made so far. */
 long test_realloc_call_count = 0;
 
-/* After how many calls realloc will fail (return NULL). */
+/*
+ * After how many calls realloc will fail (return NULL).
+ * If set to negative, realloc performs normally.
+ */
 long test_realloc_fail_after = -1;
 
 extern void *__real_realloc(void *ptr, size_t s);
